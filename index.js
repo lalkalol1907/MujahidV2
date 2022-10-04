@@ -47,7 +47,7 @@ client.on('messageCreate', async message => {
 });
 
 async function execute(message) {
-    
+
     const args = message.content.split(' ');
 
     const serverQueue = queue.get(message.guild.id);
@@ -62,6 +62,7 @@ async function execute(message) {
     const song = {
         title: songInfo.videoDetails.title,
         url: songInfo.videoDetails.video_url,
+        message: message
     };
 
     if (!serverQueue) {
@@ -71,6 +72,7 @@ async function execute(message) {
             songs: [],
             volume: 5,
             playing: true,
+            player: undefined
         };
 
         queue.set(message.guild.id, queueContruct);
@@ -87,7 +89,9 @@ async function execute(message) {
 }
 
 function skip(message) {
-
+    const serverQueue = queue.get(message.guild.id);
+    if (!serverQueue || !serverQueue.player) return message.channel.send("Нечего скипать")
+    serverQueue.player.emit(AudioPlayerStatus.Idle, () => { return })
 }
 
 function stop(message) {
@@ -96,16 +100,9 @@ function stop(message) {
 
 async function playSong(message) {
     const guild = message.guild
-    const voiceChannel = message.guild.channels.cache.find(channel => channel.members.find(member => member.user.id == message.author.id) && channel.type == 2)
     const serverQueue = queue.get(guild.id);
-
-    var song = serverQueue.songs[0];
-
-    if (!song) {
-        serverQueue.voiceChannel.leave();
-        queue.delete(guild.id);
-        return;
-    }
+    const song = serverQueue.songs[0];
+    const voiceChannel = message.guild.channels.cache.find(channel => channel.members.find(member => member.user.id == message.author.id) && channel.type == 2)
 
     const stream = await play.stream(song.url);
 
@@ -116,19 +113,34 @@ async function playSong(message) {
 
     });
 
-    const player = createAudioPlayer({
-        behaviors: {
-            noSubscriber: NoSubscriberBehavior.Play,
-        },
-    });
+    var player = serverQueue.player
+
+    if (!player) {
+        player = createAudioPlayer({
+            behaviors: {
+                noSubscriber: NoSubscriberBehavior.Play,
+            },
+        });
+        serverQueue.player = player
+    }
 
     let resource = createAudioResource(stream.stream, {
         inputType: stream.type
     })
 
     connection.subscribe(player);
-    player.play(resource);
+    player.play(resource)
+    player.on(AudioPlayerStatus.Idle, () => {
+        console.log('Music ended!');
+        serverQueue.songs.shift();
+        if (serverQueue.songs.length === 0) {
+            player.stop()
+            serverQueue.player = undefined
+            return queue.delete(guild.id);
+        }
 
+        playSong(serverQueue.songs[0].message)
+    })
     console.log("a");
 }
 
