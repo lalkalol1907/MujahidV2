@@ -4,11 +4,12 @@ import play from 'play-dl'
 import ytdl from 'ytdl-core'
 
 import { prefix, token, } from './config.json';
+import Song from "./models/song";
+import { addedToQueueEmbed, playingEmbed } from "./embeds";
 
-interface Song {
-    title: string,
-    url: string,
-    message: Message
+const COMMANDS = {
+    play: [prefix+'p', prefix+'play'],
+    skip: [prefix+'skip', prefix+'fs']
 }
 
 interface QueueInterface {
@@ -30,6 +31,16 @@ const client = new Client({
     ],
 });
 
+function validURL(str: string) {
+    var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+        '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
+    return !!pattern.test(str);
+}
+
 const queue = new Map<string, QueueInterface>();
 
 client.on('messageCreate', async (message: Message) => {
@@ -37,18 +48,22 @@ client.on('messageCreate', async (message: Message) => {
     if (message.author.bot) return;
     if (!message.content.startsWith(prefix)) return;
 
-    if (message.content.startsWith(`${prefix}play`)) {
+    const command = message.content.split(' ')[0]
+
+    if (COMMANDS.play.includes(command)) {
         execute(message);
         return;
-    } else if (message.content.startsWith(`${prefix}skip`)) {
+    }
+    if (COMMANDS.skip.includes(command)) {
         skip(message);
         return;
-    } else if (message.content.startsWith(`${prefix}stop`)) {
+    }
+    if (message.content.startsWith(`${prefix}stop`)) {
         stop(message);
         return;
-    } else {
-        message.channel.send('You need to enter a valid command!')
     }
+
+    message.channel.send('You need to enter a valid command!')
 });
 
 async function execute(message: Message) {
@@ -69,12 +84,43 @@ async function execute(message: Message) {
 
     if (!voiceChannel) return message.channel.send('Вы не находитесь в голосовом канале');
 
-    const songInfo = await ytdl.getInfo(args[1]);
-    const song: Song = {
-        title: songInfo.videoDetails.title,
-        url: songInfo.videoDetails.video_url,
-        message: message
-    };
+    let isUrl = validURL(args[0]);
+
+    var song: Song
+
+    if (isUrl) {
+
+        const songInfo = await ytdl.getInfo(args[1]);
+
+        song = {
+            title: songInfo.videoDetails.title,
+            url: songInfo.videoDetails.video_url,
+            duration: parseInt(songInfo.videoDetails.lengthSeconds),
+            pic: songInfo.videoDetails.thumbnail.thumbnails[0].url,
+            message: message
+        };
+
+    } else {
+
+        var arg = ""
+
+        for (let i = 1; i < args.length; i++) {
+            arg += args[i]
+            if (i !== args.length - 1) arg += " "
+        }
+
+        let yt_info = await play.search(arg, {
+            limit: 1
+        })
+
+        song = {
+            title: yt_info[0].title!,
+            url: yt_info[0].url,
+            duration: yt_info[0].durationInSec,
+            pic: yt_info[0].thumbnails[0].url,
+            message: message
+        }
+    }
 
     if (!serverQueue) {
         const queueContruct: QueueInterface = {
@@ -94,7 +140,7 @@ async function execute(message: Message) {
     } else {
         serverQueue.songs.push(song);
         console.log(serverQueue.songs);
-        return message.channel.send(`${song.title} добавлен в очередь`);
+        return message.channel.send({embeds: [addedToQueueEmbed(song, serverQueue.songs.length - 1)]});
     }
 
 }
@@ -154,6 +200,7 @@ async function playSong(message: Message) {
 
     connection.subscribe(player);
     player.play(resource)
+    song.message.channel.send({embeds: [playingEmbed(song)]})
     player.on(AudioPlayerStatus.Idle, () => {
         serverQueue.songs.shift();
         queue.set(guild.id, serverQueue)
