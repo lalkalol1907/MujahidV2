@@ -38,7 +38,21 @@ const addedToQueueEmbed = (song: Song, queueNumber: number) => {
 	)
 }
 
+const npEmbed = (song: Song) => {
+	return new EmbedBuilder()
+    .setColor(0x0099FF)
+	.setTitle(song.title)
+	.setURL(song.url)
+	.setAuthor({ name: 'Now playing:', iconURL: song.message.author.avatarURL() })
+	.setThumbnail(song.pic)
+	.addFields(
+		{ name: 'Duration:', value: timeFormat(song.duration), inline: true },
+		{ name: 'Current time', value: timeFormat(song.curTime), inline: true }
+	)	
+}
+
 export {
     playingEmbed,
-    addedToQueueEmbed
+    addedToQueueEmbed,
+	npEmbed
 }

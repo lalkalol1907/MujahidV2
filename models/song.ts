@@ -5,7 +5,8 @@ interface Song {
     url: string,
     duration: number,
     pic: string,
-    message: Message
+    message: Message,
+    curTime: number
 }
 
 export default Song;

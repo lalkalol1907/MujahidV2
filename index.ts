@@ -5,12 +5,19 @@ import ytdl from 'ytdl-core'
 
 import { prefix, token, } from './config.json';
 import Song from "./models/song";
-import { addedToQueueEmbed, playingEmbed } from "./embeds";
+import { addedToQueueEmbed, playingEmbed, npEmbed } from "./embeds";
 
 const COMMANDS = {
-    play: [prefix+'p', prefix+'play'],
-    skip: [prefix+'skip', prefix+'fs']
+    play: ['p', 'play'],
+    skip: ['skip', 'fs'],
+    stop: ['stop'],
+    queue: ['q', 'queue'],
+    np: ['np'],
 }
+
+for (let command of Object.values(COMMANDS))
+    for (let element in command)
+        command[element] = '^' + command[element]
 
 interface QueueInterface {
     textChannel: DMChannel | PartialDMChannel | NewsChannel | TextChannel | PrivateThreadChannel | PublicThreadChannel<boolean> | VoiceChannel,
@@ -18,7 +25,7 @@ interface QueueInterface {
     songs: Song[],
     volume: number,
     playing: boolean,
-    player: AudioPlayer | undefined
+    player: AudioPlayer | undefined,
 }
 
 const client = new Client({
@@ -51,22 +58,43 @@ client.on('messageCreate', async (message: Message) => {
     const command = message.content.split(' ')[0]
 
     if (COMMANDS.play.includes(command)) {
-        execute(message);
+        playCommand(message);
         return;
     }
     if (COMMANDS.skip.includes(command)) {
-        skip(message);
+        skipCommand(message);
         return;
     }
-    if (message.content.startsWith(`${prefix}stop`)) {
+    if (COMMANDS.stop.includes(command)) {
         stop(message);
         return;
+    }
+    if (COMMANDS.queue.includes(command)) {
+        queueCommand(message)
+        return
     }
 
     message.channel.send('You need to enter a valid command!')
 });
 
-async function execute(message: Message) {
+async function queueCommand(message: Message) {
+
+}
+
+async function npCommand(message: Message) {
+    if (!message.guild)
+        return message.channel.send('Nothing is playing now!')
+
+    const serverQueue = queue.get(message.guild.id);
+
+    if (!serverQueue?.songs[0])
+        return message.channel.send('Nothing is playing now!')
+
+    return message.channel.send({embeds: [npEmbed(serverQueue.songs[0])]});
+
+}
+
+async function playCommand(message: Message) {
     if (!message.guild) return
 
     const args = message.content.split(' ');
@@ -97,7 +125,8 @@ async function execute(message: Message) {
             url: songInfo.videoDetails.video_url,
             duration: parseInt(songInfo.videoDetails.lengthSeconds),
             pic: songInfo.videoDetails.thumbnail.thumbnails[0].url,
-            message: message
+            message: message,
+            curTime: 0
         };
 
     } else {
@@ -118,7 +147,8 @@ async function execute(message: Message) {
             url: yt_info[0].url,
             duration: yt_info[0].durationInSec,
             pic: yt_info[0].thumbnails[0].url,
-            message: message
+            message: message,
+            curTime: 0
         }
     }
 
@@ -145,7 +175,7 @@ async function execute(message: Message) {
 
 }
 
-function skip(message: Message) {
+function skipCommand(message: Message) {
     if (!message.guild) return
     const serverQueue = queue.get(message.guild.id);
     if (!serverQueue || !serverQueue.player) return message.channel.send("Нечего скипать")
@@ -212,6 +242,13 @@ async function playSong(message: Message) {
         }
 
         playSong(serverQueue.songs[0].message)
+    })
+    player.on(AudioPlayerStatus.Playing, () => {
+        while (song.curTime <= song.duration) {
+            setTimeout(() => {
+                song.curTime += 1
+            }, 1000)
+        }
     })
 }
 
