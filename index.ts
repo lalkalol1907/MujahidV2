@@ -1,6 +1,6 @@
 import { Message, Client, GatewayIntentBits, GuildBasedChannel, VoiceChannel, DMChannel, PartialDMChannel, NewsChannel, TextChannel, PrivateThreadChannel, PublicThreadChannel, GuildMember, Collection } from "discord.js";
-import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, NoSubscriberBehavior, AudioPlayer } from '@discordjs/voice';
-import play from 'play-dl'
+import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, NoSubscriberBehavior, AudioPlayer, AudioResource } from '@discordjs/voice';
+import play, { SoundCloudStream, YouTubeStream } from 'play-dl'
 import ytdl from 'ytdl-core'
 
 import { prefix, token, } from './config.json';
@@ -19,6 +19,8 @@ for (let command of Object.values(COMMANDS))
     for (let element in command)
         command[element] = '^' + command[element]
 
+
+
 interface QueueInterface {
     textChannel: DMChannel | PartialDMChannel | NewsChannel | TextChannel | PrivateThreadChannel | PublicThreadChannel<boolean> | VoiceChannel,
     voiceChannel: GuildBasedChannel,
@@ -26,6 +28,7 @@ interface QueueInterface {
     volume: number,
     playing: boolean,
     player: AudioPlayer | undefined,
+    curResource: AudioResource | undefined
 }
 
 const client = new Client({
@@ -73,6 +76,10 @@ client.on('messageCreate', async (message: Message) => {
         queueCommand(message)
         return
     }
+    if (COMMANDS.np.includes(command)) {
+        npCommand(message) 
+        return
+    }
 
     message.channel.send('You need to enter a valid command!')
 });
@@ -90,7 +97,7 @@ async function npCommand(message: Message) {
     if (!serverQueue?.songs[0])
         return message.channel.send('Nothing is playing now!')
 
-    return message.channel.send({embeds: [npEmbed(serverQueue.songs[0])]});
+    return message.channel.send({embeds: [npEmbed(serverQueue.songs[0], serverQueue.curResource?.playbackDuration)]});
 
 }
 
@@ -159,7 +166,8 @@ async function playCommand(message: Message) {
             songs: [],
             volume: 5,
             playing: true,
-            player: undefined
+            player: undefined,
+            curResource: undefined
         };
 
         queue.set(message.guild.id, queueContruct);
@@ -228,6 +236,8 @@ async function playSong(message: Message) {
         inputType: stream.type
     })
 
+    serverQueue.curResource = resource
+
     connection.subscribe(player);
     player.play(resource)
     song.message.channel.send({embeds: [playingEmbed(song)]})
@@ -242,13 +252,6 @@ async function playSong(message: Message) {
         }
 
         playSong(serverQueue.songs[0].message)
-    })
-    player.on(AudioPlayerStatus.Playing, () => {
-        while (song.curTime <= song.duration) {
-            setTimeout(() => {
-                song.curTime += 1
-            }, 1000)
-        }
     })
 }
 
