@@ -177,7 +177,8 @@ async function playCommand(message: Message) {
         await playSong(message);
     } else {
         serverQueue.songs.push(song);
-        console.log(serverQueue.songs);
+        console.log(serverQueue.songs[serverQueue.songs.length - 1]);
+        
         return message.channel.send({embeds: [addedToQueueEmbed(song, serverQueue.songs.length - 1)]});
     }
 
