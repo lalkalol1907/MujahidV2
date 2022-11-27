@@ -6,7 +6,7 @@ const timeFormat = (time: number): string => {
     let d = [((time - time % 3600) / 3600).toString(), ((time % 3600 - time % 3600 % 60) / 60).toString(), (time % 60).toString()]
     for (let i = 0; i < 3; i++) {
         if (d[i].length === 1) {
-            d[i] = "0" + d[i]
+            d[i+2] = "0" + d[i]
         }
     }
     return `${d[0]}:${d[1]}:${d[2]}`
