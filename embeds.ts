@@ -24,6 +24,8 @@ const formatLine = (time1: number, time2: number) => {
     return str
 }
 
+
+
 // inside a command, event listener, etc.
 const playingEmbed = (song: Song) => {
     return new EmbedBuilder()
