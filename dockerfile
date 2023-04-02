@@ -1,5 +1,8 @@
 FROM node:16
 RUN apt-get update
-copy / .
+copy / /src/
+WORKDIR /src
 RUN npm i
-CMD ["node", "index"]
+
+RUN npm run build
+CMD ["npm", "start"]
