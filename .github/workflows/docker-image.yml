@@ -23,8 +23,6 @@ jobs:
 
       - name: Build image
         run: docker build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID} --build-arg CONFIG_PHRASE="${{ secrets.CONFIG_PHRASE }}"
-        env:
-          CONFIG_PHRASE: ${{ secrets.CONFIG_PHRASE }}
 
 
       - name: Log in to registry
