@@ -28,5 +28,5 @@ jobs:
         with:
           push: true
           tags: lalkalol1907/mujahid-v2:latest
-          secrets: |
+          build-args:: |
             CONFIG_PHRASE=${{ secrets.CONFIG_PHRASE }}
