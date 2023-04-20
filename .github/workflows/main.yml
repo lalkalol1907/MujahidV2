@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Decrypt large secret
-        run: ./decrypt_secret.sh
+        run: ./decrypt_config.sh
         env:
           CONFIG_PHRASE: ${{ secrets.CONFIG_PHRASE }}
       # This command is just an example to show your secret being printed
