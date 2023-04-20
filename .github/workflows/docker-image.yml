@@ -1,12 +1,4 @@
-name: Docker build
-
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+name: Docker build prod
 
 env:
   IMAGE_NAME: mujahid-v2
