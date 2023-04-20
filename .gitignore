@@ -1,5 +1,7 @@
 /node_modules
 *.js
+!babel.config.js
+!jest.config.js
 config.json
 .idea
 package-lock.json

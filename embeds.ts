@@ -67,5 +67,6 @@ const npEmbed = (song: Song, curTime: number = 0) => {
 export {
     playingEmbed,
     addedToQueueEmbed,
-    npEmbed
+    npEmbed,
+    timeFormat
 }
