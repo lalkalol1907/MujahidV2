@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Build image
-        run: docker build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID} --CONFIG_PHRASE=${{ secrets.CONFIG_PHRASE}}"
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID} --build-arg CONFIG_PHRASE=${{ secrets.CONFIG_PHRASE}}"
 
       - name: Log in to registry
         # This is where you will update the personal access token to GITHUB_TOKEN
