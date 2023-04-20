@@ -1,5 +1,10 @@
 name: Docker build prod
 
+on:
+  push:
+        branches:
+          - release
+
 env:
   IMAGE_NAME: mujahid-v2
 
