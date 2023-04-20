@@ -1,4 +1,6 @@
 FROM node:16
+ARG CONFIG_PHRASE=
+ENV CONFIG_PHRASE ${CONFIG_PHRASE}
 RUN apt-get update
 copy / /src/
 WORKDIR /src
