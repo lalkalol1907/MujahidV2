@@ -23,7 +23,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-      run: ./decrypt_config.sh
+    - run: ./decrypt_config.sh
       env:
           CONFIG_PHRASE: ${{ secrets.CONFIG_PHRASE }}
     - run: npm ci
