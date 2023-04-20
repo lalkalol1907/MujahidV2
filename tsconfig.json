@@ -99,6 +99,6 @@
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
   "exclude": [
-    "*.js"
+    "*.js", "*.test.ts"
   ]
 }
