@@ -1,10 +1,12 @@
 name: Docker build
 
 on:
-  workflow_run:
-    workflows: ["Node.js CI"]
-    types:
-      - completed
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 env:
   IMAGE_NAME: mujahid-v2
@@ -25,7 +27,7 @@ jobs:
         run: docker build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID} --build-arg CONFIG_PHRASE=${{ secrets.CONFIG_PHRASE }}"
         env:
           CONFIG_PHRASE: ${{ secrets.CONFIG_PHRASE }}
-          
+
 
       - name: Log in to registry
         # This is where you will update the personal access token to GITHUB_TOKEN
