@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag lalkalol1907/mujahidV2:$(date +%s)
+      run: docker build . --file Dockerfile --tag lalkalol1907/mujahid-v2:$(date +%s)
