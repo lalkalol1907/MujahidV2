@@ -4,7 +4,7 @@ import play, { SoundCloudStream, YouTubeStream } from 'play-dl'
 import ytdl from 'ytdl-core'
 var argv = require('minimist')(process.argv.slice(2));
 
-const [prefix, token] = [process.env.prefix || "", process.env.TOKEN || ""]
+const [prefix, token] = [process.env.PREFIX || "", process.env.TOKEN || ""]
 
 import Song from "./models/song";
 import { addedToQueueEmbed, playingEmbed, npEmbed } from "./embeds";
