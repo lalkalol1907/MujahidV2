@@ -1,12 +1,20 @@
-name: Docker build test
+name: Node test and Docker build test
 
 on:
   push:
     branches:
       - master
-  pull_request:
+    paths-ignore:
+      - README.md
+      - CHANGELOG.md # Should never be edited anyway
+      - .gitignore
+      - .github/**
+  pull_request_target:
     branches:
       - master
+    types:
+      - closed
+  workflow_dispatch:
 
 env:
   IMAGE_NAME: mujahid-v2
@@ -22,11 +30,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run build --if-present
+
+      - name: Test
+        run: npm test
 
       - name: Build image
-        run: docker build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}" --build-arg CONFIG_PHRASE="${{ secrets.CONFIG_PHRASE }}"
-        env:
-          CONFIG_PHRASE: ${{ secrets.CONFIG_PHRASE }}
+        run: docker build . --file dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+
 
 
       - name: Log in to registry
