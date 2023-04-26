@@ -2,8 +2,10 @@ import { Message, Client, GatewayIntentBits, GuildBasedChannel, VoiceChannel, DM
 import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, NoSubscriberBehavior, AudioPlayer, AudioResource } from '@discordjs/voice';
 import play, { SoundCloudStream, YouTubeStream } from 'play-dl'
 import ytdl from 'ytdl-core'
+var argv = require('minimist')(process.argv.slice(2));
 
-import { prefix, token, } from './config.json';
+const [prefix, token] = [process.env.prefix || "", process.env.TOKEN || ""]
+
 import Song from "./models/song";
 import { addedToQueueEmbed, playingEmbed, npEmbed } from "./embeds";
 
@@ -77,7 +79,7 @@ client.on('messageCreate', async (message: Message) => {
         return
     }
     if (COMMANDS.np.includes(command)) {
-        npCommand(message) 
+        npCommand(message)
         return
     }
 
@@ -178,7 +180,7 @@ async function playCommand(message: Message) {
     } else {
         serverQueue.songs.push(song);
         console.log(serverQueue.songs[serverQueue.songs.length - 1]);
-        
+
         return message.channel.send({embeds: [addedToQueueEmbed(song, serverQueue.songs.length - 1)]});
     }
 
