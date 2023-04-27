@@ -22,22 +22,16 @@ import {
     AudioPlayer,
     AudioResource
 } from '@discordjs/voice';
-import play, {SoundCloudStream, YouTubeStream} from 'play-dl'
+import play from 'play-dl'
 import ytdl from 'ytdl-core'
-import {load} from 'ts-dotenv';
 import Song from "./models/song";
 import {addedToQueueEmbed, playingEmbed, npEmbed} from "./embeds";
 
-const PROD = process.env.ENV === "PROD"
+if (process.env.NODE_ENV !== "PROD") {
+    require('dotenv/config');
+}
 
-const env = load({
-    PREFIX: String,
-    TOKEN: String,
-});
-
-const [prefix, token] = [(PROD ? process.env.PREFIX : env.PREFIX) || "", (PROD ? process.env.TOKEN : env.TOKEN) || ""]
-
-console.log(PROD, token)
+const [prefix, token] = [process.env.PREFIX || "", process.env.TOKEN || ""]
 
 const COMMANDS = {
     play: ['p', 'play'],
@@ -290,4 +284,8 @@ async function playSong(message: Message) {
 }
 
 
-client.login(token);
+if (token !== "") {
+    client.login(token);
+} else {
+    console.log("Token error!")
+}
