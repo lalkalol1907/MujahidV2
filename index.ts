@@ -28,15 +28,16 @@ import {load} from 'ts-dotenv';
 import Song from "./models/song";
 import {addedToQueueEmbed, playingEmbed, npEmbed} from "./embeds";
 
-const PROD = process.env.ENV !== "PROD"
+const PROD = process.env.ENV === "PROD"
 
 const env = load({
-    TOKEN: String,
     PREFIX: String,
+    TOKEN: String,
 });
 
 const [prefix, token] = [(PROD ? process.env.PREFIX : env.PREFIX) || "", (PROD ? process.env.TOKEN : env.TOKEN) || ""]
 
+console.log(PROD, token)
 
 const COMMANDS = {
     play: ['p', 'play'],
