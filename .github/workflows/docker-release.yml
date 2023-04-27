@@ -19,6 +19,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - run: npm run prepare
+      - run: npm run build
+
+      - name: Test
+        run: npm test
 
       - name: Build image
         run: docker build . --file dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
@@ -26,7 +37,6 @@ jobs:
           TOKEN: ${{ secrets.TOKEN }}
           PREFIX: ${{ secrets.PREFIX }}
           ENV: ${{ secrets.ENV }}
-
 
       - name: Log in to registry
         # This is where you will update the personal access token to GITHUB_TOKEN

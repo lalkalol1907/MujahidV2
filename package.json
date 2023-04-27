@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node index",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "npm i"
   },
   "author": "",
   "license": "ISC",
