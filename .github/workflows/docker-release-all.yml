@@ -1,4 +1,4 @@
-name: Docker build release with config
+name: Docker build release for all
 
 on:
   push:
@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: mujahid-v2
+  IMAGE_NAME: mujahid-v2-all
 
 jobs:
   # Push image to GitHub Packages.
@@ -45,8 +45,8 @@ jobs:
       - name: Build image
         run: docker build . --file dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
         env:
-          TOKEN: ${{ secrets.TOKEN }}
-          PREFIX: ${{ secrets.PREFIX }}
+          TOKEN: ""
+          PREFIX: ""
           ENV: ${{ secrets.ENV }}
 
       - name: Log in to registry
