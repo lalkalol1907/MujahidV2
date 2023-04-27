@@ -1,12 +1,42 @@
-import { Message, Client, GatewayIntentBits, GuildBasedChannel, VoiceChannel, DMChannel, PartialDMChannel, NewsChannel, TextChannel, PrivateThreadChannel, PublicThreadChannel, GuildMember, Collection } from "discord.js";
-import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, NoSubscriberBehavior, AudioPlayer, AudioResource } from '@discordjs/voice';
-import play, { SoundCloudStream, YouTubeStream } from 'play-dl'
+import {
+    Message,
+    Client,
+    GatewayIntentBits,
+    GuildBasedChannel,
+    VoiceChannel,
+    DMChannel,
+    PartialDMChannel,
+    NewsChannel,
+    TextChannel,
+    PrivateThreadChannel,
+    PublicThreadChannel,
+    GuildMember,
+    Collection
+} from "discord.js";
+import {
+    joinVoiceChannel,
+    createAudioPlayer,
+    createAudioResource,
+    AudioPlayerStatus,
+    NoSubscriberBehavior,
+    AudioPlayer,
+    AudioResource
+} from '@discordjs/voice';
+import play, {SoundCloudStream, YouTubeStream} from 'play-dl'
 import ytdl from 'ytdl-core'
-
-const [prefix, token] = [process.env.PREFIX || "", process.env.TOKEN || ""]
-
+import {load} from 'ts-dotenv';
 import Song from "./models/song";
-import { addedToQueueEmbed, playingEmbed, npEmbed } from "./embeds";
+import {addedToQueueEmbed, playingEmbed, npEmbed} from "./embeds";
+
+const PROD = process.env.ENV !== "PROD"
+
+const env = load({
+    TOKEN: String,
+    PREFIX: String,
+});
+
+const [prefix, token] = [(PROD ? process.env.PREFIX : env.PREFIX) || "", (PROD ? process.env.TOKEN : env.TOKEN) || ""]
+
 
 const COMMANDS = {
     play: ['p', 'play'],
@@ -19,7 +49,6 @@ const COMMANDS = {
 for (let command of Object.values(COMMANDS))
     for (let element in command)
         command[element] = '^' + command[element]
-
 
 
 interface QueueInterface {
@@ -189,7 +218,9 @@ function skipCommand(message: Message) {
     if (!message.guild) return
     const serverQueue = queue.get(message.guild.id);
     if (!serverQueue || !serverQueue.player) return message.channel.send("Нечего скипать")
-    serverQueue.player.emit(AudioPlayerStatus.Idle, () => { return })
+    serverQueue.player.emit(AudioPlayerStatus.Idle, () => {
+        return
+    })
 }
 
 function stop(message: Message) {

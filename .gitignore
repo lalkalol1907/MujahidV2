@@ -4,4 +4,5 @@
 !jest.config.js
 config.json
 .idea
-package-lock.json
+/.package-lock.json
+/.env

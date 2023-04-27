@@ -25,6 +25,7 @@ jobs:
         env:
           TOKEN: ${{ secrets.TOKEN }}
           PREFIX: ${{ secrets.PREFIX }}
+          ENV: ${{ secrets.ENV }}
 
 
       - name: Log in to registry
