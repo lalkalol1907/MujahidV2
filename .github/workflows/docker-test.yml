@@ -44,6 +44,9 @@ jobs:
 
       - name: Build image
         run: docker build . --file dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+        env:
+          TOKEN: ${{ secrets.TOKEN }}
+          PREFIX: ${{ secrets.PREFIX }}
 
 
 

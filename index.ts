@@ -2,7 +2,6 @@ import { Message, Client, GatewayIntentBits, GuildBasedChannel, VoiceChannel, DM
 import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, NoSubscriberBehavior, AudioPlayer, AudioResource } from '@discordjs/voice';
 import play, { SoundCloudStream, YouTubeStream } from 'play-dl'
 import ytdl from 'ytdl-core'
-var argv = require('minimist')(process.argv.slice(2));
 
 const [prefix, token] = [process.env.PREFIX || "", process.env.TOKEN || ""]
 
