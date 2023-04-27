@@ -284,8 +284,6 @@ async function playSong(message: Message) {
 }
 
 
-if (token !== "") {
-    client.login(token);
-} else {
-    console.log("Token error!")
-}
+client.login(token).then(s => {
+    console.log("Bot started. Token: ", s);
+})
