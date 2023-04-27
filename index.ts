@@ -1,13 +1,37 @@
-import { Message, Client, GatewayIntentBits, GuildBasedChannel, VoiceChannel, DMChannel, PartialDMChannel, NewsChannel, TextChannel, PrivateThreadChannel, PublicThreadChannel, GuildMember, Collection } from "discord.js";
-import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, NoSubscriberBehavior, AudioPlayer, AudioResource } from '@discordjs/voice';
-import play, { SoundCloudStream, YouTubeStream } from 'play-dl'
+import {
+    Message,
+    Client,
+    GatewayIntentBits,
+    GuildBasedChannel,
+    VoiceChannel,
+    DMChannel,
+    PartialDMChannel,
+    NewsChannel,
+    TextChannel,
+    PrivateThreadChannel,
+    PublicThreadChannel,
+    GuildMember,
+    Collection
+} from "discord.js";
+import {
+    joinVoiceChannel,
+    createAudioPlayer,
+    createAudioResource,
+    AudioPlayerStatus,
+    NoSubscriberBehavior,
+    AudioPlayer,
+    AudioResource
+} from '@discordjs/voice';
+import play from 'play-dl'
 import ytdl from 'ytdl-core'
-var argv = require('minimist')(process.argv.slice(2));
+import Song from "./models/song";
+import {addedToQueueEmbed, playingEmbed, npEmbed} from "./embeds";
+
+if (process.env.NODE_ENV !== "PROD") {
+    require('dotenv/config');
+}
 
 const [prefix, token] = [process.env.PREFIX || "", process.env.TOKEN || ""]
-
-import Song from "./models/song";
-import { addedToQueueEmbed, playingEmbed, npEmbed } from "./embeds";
 
 const COMMANDS = {
     play: ['p', 'play'],
@@ -20,7 +44,6 @@ const COMMANDS = {
 for (let command of Object.values(COMMANDS))
     for (let element in command)
         command[element] = '^' + command[element]
-
 
 
 interface QueueInterface {
@@ -190,7 +213,9 @@ function skipCommand(message: Message) {
     if (!message.guild) return
     const serverQueue = queue.get(message.guild.id);
     if (!serverQueue || !serverQueue.player) return message.channel.send("Нечего скипать")
-    serverQueue.player.emit(AudioPlayerStatus.Idle, () => { return })
+    serverQueue.player.emit(AudioPlayerStatus.Idle, () => {
+        return
+    })
 }
 
 function stop(message: Message) {
@@ -259,4 +284,6 @@ async function playSong(message: Message) {
 }
 
 
-client.login(token);
+client.login(token).then(s => {
+    console.log("Bot started. Token: ", s);
+})

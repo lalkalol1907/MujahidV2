@@ -1,9 +1,20 @@
-name: Docker build release
+name: Docker build release with config
 
 on:
   push:
-        branches:
-          - release
+    branches:
+      - release
+    paths-ignore:
+      - README.md
+      - CHANGELOG.md # Should never be edited anyway
+      - .gitignore
+      - .github/**
+  pull_request_target:
+    branches:
+      - release
+    types:
+      - closed
+  workflow_dispatch:
 
 env:
   IMAGE_NAME: mujahid-v2
@@ -19,16 +30,28 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - run: npm i
+      - run: npm run build
+
+      - name: Test
+        run: npm test
 
       - name: Build image
-        run: docker build . --file dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}" --build-arg CONFIG_PHRASE="${{ secrets.CONFIG_PHRASE }}"
+        run: docker build . --file dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
         env:
-          CONFIG_PHRASE: ${{ secrets.CONFIG_PHRASE }}
-
+          TOKEN: ${{ secrets.TOKEN }}
+          PREFIX: ${{ secrets.PREFIX }}
+          ENV: ${{ secrets.ENV }}
 
       - name: Log in to registry
         # This is where you will update the personal access token to GITHUB_TOKEN
-        run: echo "${{ secrets.TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+        run: echo "${{ secrets.GIT_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
       - name: Push image
         run: |
