@@ -3,7 +3,7 @@ name: Node test and Docker build test
 on:
   push:
     branches:
-      - master
+      - test
     paths-ignore:
       - README.md
       - CHANGELOG.md # Should never be edited anyway
@@ -11,7 +11,7 @@ on:
       - .github/**
   pull_request_target:
     branches:
-      - master
+      - test
     types:
       - closed
   workflow_dispatch:
